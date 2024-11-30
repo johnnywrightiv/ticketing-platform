@@ -1,65 +1,99 @@
-export default function AdminDashboard() {
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from '@/components/ui/card';
+import db from '@/db/db';
+import { formatCurrency, formatNumber } from '@/lib/formaters';
+
+async function getSalesData() {
+  const data = await db.order.aggregate({
+    _sum: {
+      pricePaidInCents: true,
+    },
+    _count: true,
+  });
+
+  return {
+    amount: (data._sum.pricePaidInCents || 0) / 100,
+    numberofSales: data._count,
+  };
+}
+
+async function getUserData() {
+  const [userCount, orderData] = await Promise.all([
+    db.user.count(),
+    db.order.aggregate({
+      _sum: { pricePaidInCents: true },
+    }),
+  ]);
+
+  return {
+    userCount,
+    averageValuePerUser:
+      userCount === 0
+        ? 0
+        : (orderData._sum.pricePaidInCents || 0) / userCount / 100,
+  };
+}
+
+async function getProductData() {
+  const [activeCount, inactiveCount] = await Promise.all([
+    db.product.count({ where: { isAvailableForPurchase: true } }),
+    db.product.count({ where: { isAvailableForPurchase: false } }),
+  ]);
+
+  return {
+    activeCount,
+    inactiveCount,
+  };
+}
+
+export default async function AdminDashboard() {
+  const [salesData, userData, productData] = await Promise.all([
+    getSalesData(),
+    getUserData(),
+    getProductData(),
+  ]);
+
   return (
-    <div className="space-y-6 p-6">
-      <div className="grid grid-cols-2 gap-4">
-        {/* Background and Foreground */}
-        <div className="bg-background text-foreground border-border rounded-lg border p-4">
-          <h2 className="text-xl font-bold">Background & Foreground</h2>
-          <p>This shows the base background and text colors</p>
-        </div>
-
-        {/* Card */}
-        <div className="bg-card text-card-foreground border-border rounded-lg border p-4">
-          <h2 className="text-xl font-bold">Card</h2>
-          <p>Card background and text colors</p>
-        </div>
-
-        {/* Popover */}
-        <div className="bg-popover text-popover-foreground border-border rounded-lg border p-4">
-          <h2 className="text-xl font-bold">Popover</h2>
-          <p>Popover background and text</p>
-        </div>
-
-        {/* Primary */}
-        <div className="bg-primary text-primary-foreground rounded-lg p-4">
-          <h2 className="text-xl font-bold">Primary</h2>
-          <p>Primary color with its foreground</p>
-        </div>
-
-        {/* Secondary */}
-        <div className="bg-secondary text-secondary-foreground rounded-lg p-4">
-          <h2 className="text-xl font-bold">Secondary</h2>
-          <p>Secondary color with its foreground</p>
-        </div>
-
-        {/* Muted */}
-        <div className="bg-muted text-muted-foreground rounded-lg p-4">
-          <h2 className="text-xl font-bold">Muted</h2>
-          <p>Muted color with its foreground</p>
-        </div>
-
-        {/* Accent */}
-        <div className="bg-accent text-accent-foreground rounded-lg p-4">
-          <h2 className="text-xl font-bold">Accent</h2>
-          <p>Accent color with its foreground</p>
-        </div>
-
-        {/* Border and Input */}
-        <div className="border-border rounded-lg border p-4">
-          <h2 className="text-xl font-bold">Border</h2>
-          <input
-            type="text"
-            placeholder="Input field"
-            className="border-input w-full rounded-lg border p-2"
-          />
-        </div>
-
-        {/* Ring */}
-        <div className="ring-ring rounded-lg p-4 ring-2">
-          <h2 className="text-xl font-bold">Ring</h2>
-          <p>Shows the ring color (often used for focus states)</p>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <DashboardCard
+        title={'Sales'}
+        subtitle={`${formatNumber(salesData.numberofSales)} Sales`}
+        body={formatCurrency(salesData.amount)}
+      />
+      <DashboardCard
+        title={'Customers'}
+        subtitle={`${formatCurrency(userData.averageValuePerUser)} Average Value`}
+        body={formatNumber(userData.userCount)}
+      />
+      <DashboardCard
+        title={'Active Products'}
+        subtitle={`${formatNumber(productData.inactiveCount)} Inactive`}
+        body={formatNumber(productData.activeCount)}
+      />
     </div>
+  );
+}
+
+type DashboardCardProps = {
+  title: string;
+  subtitle: string;
+  body: string;
+};
+
+function DashboardCard({ title, subtitle, body }: DashboardCardProps) {
+  return (
+    <Card>
+      <CardHeader>
+        {title}
+        <CardDescription>{subtitle}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p>{body}</p>
+      </CardContent>
+    </Card>
   );
 }
