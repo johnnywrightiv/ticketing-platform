@@ -31,7 +31,7 @@ const ThemeToggle = () => {
       size="icon"
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       aria-label="Toggle theme"
-      className="hover:bg-secondary hover:text-secondary-foreground focus-visible:hover:bg-secondary focus-visible:hover:text-secondary-foreground rounded-md p-2 transition-colors"
+      className="hover:bg-primary hover:text-secondary-foreground focus-visible:hover:bg-primary focus-visible:hover:text-secondary-foreground rounded-md p-2 transition-colors"
     >
       {theme === 'light' ? (
         <MoonIcon className="h-5 w-5" />
@@ -48,8 +48,9 @@ export function NavLink(props: Omit<ComponentProps<typeof Link>, 'className'>) {
     <Link
       {...props}
       className={cn(
-        'hover:bg-secondary hover:text-secondary-foreground focus-visible:hover:bg-secondary focus-visible:hover:text-secondary-foreground rounded-md p-2 transition-colors',
-        pathname === props.href && 'bg-secondary text-secondary-foreground',
+        'hover:bg-secondary hover:text-secondary-foreground focus-visible:hover:bg-secondary focus-visible:hover:text-secondary-foreground rounded-md p-2 px-4 transition-colors',
+        pathname === props.href &&
+          'hover:bg-background bg-background text-secondary-foreground p-4 py-6',
       )}
     />
   );
@@ -59,11 +60,11 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
-    <nav className="bg-background text-foreground top-0 z-50 w-full border-b backdrop-blur-sm">
-      <div className="bg-primary container mx-auto grid h-16 grid-cols-2 items-center md:grid-cols-3">
+    <nav className="bg-foreground text-background top-0 z-50 w-full border-b backdrop-blur-sm">
+      <div className="container mx-auto grid h-16 grid-cols-2 items-center md:grid-cols-3">
         <Link
           href="/"
-          className="font-heading text-foreground text-xl font-bold transition-colors"
+          className="font-heading text-xl font-bold transition-colors"
         >
           ACME CORP
         </Link>
@@ -82,7 +83,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:bg-secondary hover:text-secondary-foreground focus-visible:hover:bg-secondary focus-visible:hover:text-secondary-foreground rounded-md p-2 transition-colors"
+                className="hover:bg-primary hover:text-secondary-foreground focus-visible:hover:bg-primary focus-visible:hover:text-secondary-foreground rounded-md p-2 transition-colors"
               >
                 <Menu className="h-6 w-6" />
               </Button>

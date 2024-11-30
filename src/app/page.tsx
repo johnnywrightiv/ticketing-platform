@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <div className="flex flex-col items-center py-2">
+    <div className="flex min-h-screen flex-col items-center py-2">
       <h1>Hello World</h1>
       <p>
         Lorem ipsum dolor sit amet consectetur, adipisicing elit. Obcaecati
