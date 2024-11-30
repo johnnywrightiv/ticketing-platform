@@ -31,7 +31,7 @@ const ThemeToggle = () => {
       size="icon"
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       aria-label="Toggle theme"
-      className="text-foreground"
+      className="hover:bg-secondary hover:text-secondary-foreground focus-visible:hover:bg-secondary focus-visible:hover:text-secondary-foreground rounded-md p-2 transition-colors"
     >
       {theme === 'light' ? (
         <MoonIcon className="h-5 w-5" />
@@ -60,10 +60,10 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
 
   return (
     <nav className="bg-background text-foreground top-0 z-50 w-full border-b backdrop-blur-sm">
-      <div className="container mx-auto grid h-16 grid-cols-2 items-center md:grid-cols-3">
+      <div className="bg-primary container mx-auto grid h-16 grid-cols-2 items-center md:grid-cols-3">
         <Link
           href="/"
-          className="font-heading text-foreground hover:text-primary text-xl font-bold transition-colors"
+          className="font-heading text-foreground text-xl font-bold transition-colors"
         >
           ACME CORP
         </Link>
@@ -79,7 +79,11 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           {/* Mobile Menu Trigger */}
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="text-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-secondary hover:text-secondary-foreground focus-visible:hover:bg-secondary focus-visible:hover:text-secondary-foreground rounded-md p-2 transition-colors"
+              >
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
@@ -87,13 +91,13 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
             {/* Mobile Navigation Sheet */}
             <SheetContent
               side="right"
-              className="w-full max-w-full sm:max-w-sm"
+              className="flex w-full max-w-full items-center justify-center text-center text-5xl font-semibold sm:max-w-sm"
             >
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <SheetDescription className="sr-only">
                 Mobile Navigation
               </SheetDescription>
-              <div className="flex flex-col justify-center gap-6 pt-10">
+              <div className="flex flex-col justify-center gap-16 pt-10">
                 {React.Children.map(children, (child) =>
                   React.cloneElement(child as React.ReactElement, {
                     onClick: () => setIsSheetOpen(false),

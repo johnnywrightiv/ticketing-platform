@@ -40,7 +40,7 @@ export default function RootLayout({
         >
           <main>{children}</main>
         </ThemeProvider>
-        <footer className="text-muted-foreground container fixed bottom-0 mx-auto px-4 pb-4 text-center text-xs">
+        <footer className="text-muted-foreground container relative bottom-0 mx-auto px-4 pb-4 text-center text-xs">
           <p>&copy; {new Date().getFullYear()} Copyright</p>
         </footer>
       </body>

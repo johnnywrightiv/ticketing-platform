@@ -7,7 +7,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <div className="min-h-screen">
       <Navbar>
         <NavLink href="/admin">Dashboard</NavLink>
         <NavLink href="/admin/products">Products</NavLink>
@@ -15,6 +15,6 @@ export default function AdminLayout({
         <NavLink href="/admin/orders">Sales</NavLink>
       </Navbar>
       <div className="container my-6">{children}</div>
-    </>
+    </div>
   );
 }
