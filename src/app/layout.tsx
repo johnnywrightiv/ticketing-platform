@@ -1,12 +1,11 @@
 import React from 'react';
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
-import { Open_Sans } from 'next/font/google';
+import { Merriweather } from 'next/font/google';
 import { Prosto_One } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
-import Navbar from '@/components/navbar';
 
-const openOpen_Sans = Open_Sans({
+const openMerriweather = Merriweather({
   weight: '300',
   subsets: ['latin'],
   variable: '--font-body',
@@ -31,7 +30,7 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="en">
       <body
-        className={`${openOpen_Sans.variable} ${headerProsto_One.variable} font-body bg-background antialiased`}
+        className={`${openMerriweather.variable} ${headerProsto_One.variable} font-body bg-background min-h-screen antialiased`}
       >
         <ThemeProvider
           attribute="class"
@@ -39,7 +38,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
           <main>{children}</main>
         </ThemeProvider>
         <footer className="text-muted-foreground container fixed bottom-0 mx-auto px-4 pb-4 text-center text-xs">

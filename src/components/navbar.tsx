@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { ComponentProps, useState } from 'react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Menu, MoonIcon, SunIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,12 +12,8 @@ import {
   SheetDescription,
   SheetTrigger,
 } from '@/components/ui/sheet';
-
-const navItems = [
-  { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
-  { name: 'Contact', href: '/contact' },
-];
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
@@ -36,6 +31,7 @@ const ThemeToggle = () => {
       size="icon"
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       aria-label="Toggle theme"
+      className="text-foreground"
     >
       {theme === 'light' ? (
         <MoonIcon className="h-5 w-5" />
@@ -46,62 +42,68 @@ const ThemeToggle = () => {
   );
 };
 
-export default function Navbar() {
+export function NavLink(props: Omit<ComponentProps<typeof Link>, 'className'>) {
+  const pathname = usePathname();
+  return (
+    <Link
+      {...props}
+      className={cn(
+        'hover:bg-secondary hover:text-secondary-foreground focus-visible:hover:bg-secondary focus-visible:hover:text-secondary-foreground rounded-md p-2 transition-colors',
+        pathname === props.href && 'bg-secondary text-secondary-foreground',
+      )}
+    />
+  );
+}
+
+export default function Navbar({ children }: { children: React.ReactNode }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
-    <nav className="bg-background sticky top-0 z-50 flex w-full justify-center border-b backdrop-blur-sm">
-      <div className="container flex h-16 w-full items-center justify-between px-4">
+    <nav className="bg-background text-foreground top-0 z-50 w-full border-b backdrop-blur-sm">
+      <div className="container mx-auto grid h-16 grid-cols-2 items-center md:grid-cols-3">
         <Link
           href="/"
-          className="text-primary bg-background flex-shrink-0 text-xl font-bold transition-none hover:bg-transparent"
+          className="font-heading text-foreground hover:text-primary text-xl font-bold transition-colors"
         >
           ACME CORP
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden flex-grow items-center justify-end md:flex md:gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="text-primary transition-colors"
-            >
-              {item.name}
-            </Link>
-          ))}
-          <ThemeToggle />
+        <div className="hidden items-center justify-center space-x-4 md:flex">
+          {children}
         </div>
 
-        {/* Mobile Navigation */}
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-full max-w-full sm:max-w-sm">
-            <SheetTitle className="hidden">Navigation</SheetTitle>
-            <SheetDescription className="hidden">
-              Mobile Navigation
-            </SheetDescription>
-            <div className="flex flex-col justify-center gap-6 space-y-6 pt-10">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-primary text-4xl font-semibold transition-colors"
-                  onClick={() => setIsSheetOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <div className="text-center">
-                <ThemeToggle />
+        <div className="flex items-center justify-end space-x-2">
+          <ThemeToggle />
+
+          {/* Mobile Menu Trigger */}
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon" className="text-foreground">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+
+            {/* Mobile Navigation Sheet */}
+            <SheetContent
+              side="right"
+              className="w-full max-w-full sm:max-w-sm"
+            >
+              <SheetTitle className="sr-only">Navigation</SheetTitle>
+              <SheetDescription className="sr-only">
+                Mobile Navigation
+              </SheetDescription>
+              <div className="flex flex-col justify-center gap-6 pt-10">
+                {React.Children.map(children, (child) =>
+                  React.cloneElement(child as React.ReactElement, {
+                    onClick: () => setIsSheetOpen(false),
+                    className: `${(child as React.ReactElement).props.className} text-2xl font-semibold`,
+                  }),
+                )}
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </nav>
   );
