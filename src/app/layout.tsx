@@ -3,7 +3,7 @@ import '@/styles/globals.css';
 import type { Metadata } from 'next';
 import { Merriweather } from 'next/font/google';
 import { Prosto_One } from 'next/font/google';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 const openMerriweather = Merriweather({
   weight: '300',
