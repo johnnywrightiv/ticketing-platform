@@ -3,26 +3,37 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Product } from '@prisma/client';
+import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
+import { Suspense } from 'react';
+import { cache } from '@/lib/cache';
 
-function getMostPopularProducts() {
-  return db.product.findMany({
-    where: { isAvailableForPurchase: true },
-    orderBy: { orders: { _count: 'desc' } },
-    take: 6,
-  });
-}
+const getMostPopularProducts = cache(
+  () => {
+    return db.product.findMany({
+      where: { isAvailableForPurchase: true },
+      orderBy: { orders: { _count: 'desc' } },
+      take: 6,
+    });
+  },
+  ['/', 'getMostPopularProducts'],
+  { revalidate: 60 * 60 * 24 },
+);
 
-function getNewestProducts() {
-  return db.product.findMany({
-    where: { isAvailableForPurchase: true },
-    orderBy: { createdAt: 'desc' },
-    take: 6,
-  });
-}
+const getNewestProducts = cache(
+  () => {
+    return db.product.findMany({
+      where: { isAvailableForPurchase: true },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+    });
+  },
+  ['/', 'getNewestProducts'],
+  { revalidate: 60 * 60 * 24 },
+);
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center space-y-12 py-2">
+    <div className="space-y-12 py-2">
       <ProductGridSection
         title="Most Popular"
         productsFetcher={getMostPopularProducts}
@@ -42,16 +53,41 @@ function ProductGridSection({
   title,
 }: ProductGridSectionProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex gap-4">
-        <h2>{title}</h2>
-        <Button variant="outline" className="space-x-2" asChild>
-          <Link href="/products">
-            <ArrowRight className="h-4 w-4" />
-            <span>View All</span>
-          </Link>
-        </Button>
+    <div>
+      <div className="space-y-4">
+        <div className="flex gap-4">
+          <h2>{title}</h2>
+          <Button variant="outline" className="space-x-2" asChild>
+            <Link href="/products">
+              <span>View All</span>
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Suspense
+          fallback={
+            <>
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+            </>
+          }
+        >
+          <ProductSuspense productsFetcher={productsFetcher} />
+        </Suspense>
       </div>
     </div>
   );
+}
+
+async function ProductSuspense({
+  productsFetcher,
+}: {
+  productsFetcher: () => Promise<Product[]>;
+}) {
+  return (await productsFetcher()).map((product) => (
+    <ProductCard key={product.id} {...product} />
+  ));
 }
