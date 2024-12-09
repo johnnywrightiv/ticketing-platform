@@ -1,5 +1,6 @@
 ## TODO
 
-[] Update Tables with Data Tables
-[]
-[]
+[ ] Fix Stripe CheckoutForm error handling UI
+[ ] Update Tables with shadcn Data Tables
+[ ]
+[ ]

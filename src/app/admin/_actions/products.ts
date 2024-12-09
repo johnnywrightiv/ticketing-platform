@@ -109,7 +109,7 @@ export async function updateProduct(
   revalidatePath('/');
   revalidatePath('/products');
 
-  redirect(`/admin/products/${id}`);
+  redirect(`/admin/products`);
 }
 
 export async function toggleProductAvailability(

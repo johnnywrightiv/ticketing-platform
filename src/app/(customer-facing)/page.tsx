@@ -55,7 +55,7 @@ function ProductGridSection({
   return (
     <div>
       <div className="space-y-4">
-        <div className="flex gap-4">
+        <div className="flex justify-between">
           <h2>{title}</h2>
           <Button variant="outline" className="space-x-2" asChild>
             <Link href="/products">
