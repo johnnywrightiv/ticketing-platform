@@ -3,7 +3,7 @@
 import db from '@/db/db';
 import { notFound } from 'next/navigation';
 
-export async function deleteUser(id: string) {
+export async function deleteOrder(id: string) {
   const order = await db.order.delete({
     where: { id },
   });
