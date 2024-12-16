@@ -13,12 +13,10 @@ export default async function SuccessPage({
 }: {
   searchParams: {
     payment_intent: string;
-    totalPrice: string;
-    quantity: string;
   };
 }) {
   const paymentIntent = await stripe.paymentIntents.retrieve(
-    searchParams.payment_intent,
+    await searchParams.payment_intent,
   );
 
   if (paymentIntent.metadata.productId == null) {
@@ -34,10 +32,6 @@ export default async function SuccessPage({
   }
 
   const isSuccess = paymentIntent.status === 'succeeded';
-
-  const totalPrice = parseInt(searchParams.totalPrice, 10);
-
-  const quantity = parseInt(searchParams.quantity, 10);
 
   return (
     <div className="bg-card w-full max-w-5xl justify-center space-y-8 rounded-[--radius] p-4">
@@ -55,7 +49,7 @@ export default async function SuccessPage({
           <div>
             <h3>{product.name}</h3>
             <h6 className="text-muted-foreground">
-              {formatCurrency(totalPrice / 100)}
+              {formatCurrency(product.priceInCents / 100)}
             </h6>
             <div className="line-clamp text-muted-foreground">
               {product.description}
@@ -67,8 +61,9 @@ export default async function SuccessPage({
               <p>
                 Price per item: {formatCurrency(product.priceInCents / 100)}
               </p>
-              <p>Quantity: {quantity}</p>
-              <strong>Total: {formatCurrency(totalPrice / 100)}</strong>
+              <strong>
+                Total: {formatCurrency(product.priceInCents / 100)}
+              </strong>
             </div>
           </div>
           <Button size="lg" asChild>
