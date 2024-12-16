@@ -1,44 +1,64 @@
 'use client';
 
+import React, { useState, useEffect, FormEvent } from 'react';
+import { useTheme } from 'next-themes';
+import {
+  PaymentElement,
+  useStripe,
+  useElements,
+  Elements,
+  LinkAuthenticationElement,
+} from '@stripe/react-stripe-js';
+import { formatCurrency } from '@/lib/formaters';
 import { Button } from '@/components/ui/button';
 import {
   Card,
-  CardTitle,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/formaters';
-import {
-  Elements,
-  LinkAuthenticationElement,
-  PaymentElement,
-  useElements,
-  useStripe,
-} from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import Image from 'next/image';
-import { FormEvent, useState } from 'react';
-import { useTheme } from 'next-themes';
+import { loadStripe } from '@stripe/stripe-js';
 
 type CheckoutFormProps = {
   product: {
-    id: string;
     imagePath: string;
     name: string;
     priceInCents: number;
     description: string;
   };
   clientSecret: string;
+  quantity?: number;
+  totalPriceInCents?: number;
 };
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY as string,
 );
 
-export function CheckoutForm({ product, clientSecret }: CheckoutFormProps) {
+export default function CheckoutForm({
+  product,
+  clientSecret,
+  quantity = 1,
+  totalPriceInCents,
+}: CheckoutFormProps) {
+  const [localQuantity, setLocalQuantity] = useState(quantity);
+  const [totalPrice, setTotalPrice] = useState(
+    totalPriceInCents || product.priceInCents * localQuantity,
+  );
+
   const { theme } = useTheme();
+
+  useEffect(() => {
+    setTotalPrice(product.priceInCents * localQuantity);
+  }, [localQuantity, product.priceInCents]);
+
+  const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(1, parseInt(event.target.value, 10));
+    setLocalQuantity(value);
+  };
 
   const appearance = {
     theme: theme === 'dark' ? 'night' : 'stripe',
@@ -66,40 +86,75 @@ export function CheckoutForm({ product, clientSecret }: CheckoutFormProps) {
   };
 
   return (
-    <>
-      <div className="mx-auto w-full max-w-5xl space-y-8">
-        <div className="flex items-center gap-4">
-          <div className="relative aspect-video w-1/3 flex-shrink-0">
-            <Image
-              className="object-cover"
-              src={product.imagePath}
-              alt={product.name}
-              fill
-            />
-          </div>
+    <div className="bg-card w-full max-w-5xl justify-center space-y-8 rounded-[--radius] p-4">
+      <div className="flex gap-4">
+        <div className="relative aspect-video w-1/2 flex-shrink-0">
+          <Image
+            className="rounded-[--radius] object-cover"
+            src={product.imagePath}
+            alt={product.name}
+            fill
+          />
+        </div>
+        <div className="flex w-full flex-col justify-between">
           <div>
-            <div className="text-lg">
-              {formatCurrency(product.priceInCents / 100)}
-            </div>
-            <h1>{product.name}</h1>
-            <div className="text-muted-foreground line-clamp-3">
+            <h3>{product.name}</h3>
+            <h6 className="text-muted-foreground">
+              {formatCurrency(totalPrice / 100)}
+            </h6>
+            <div className="line-clamp text-muted-foreground">
               {product.description}
             </div>
           </div>
+
+          <div className="items-start justify-between">
+            <div className="mt-4 flex items-center gap-2">
+              <label htmlFor="quantity" className="text-sm">
+                Quantity:
+              </label>
+              <input
+                id="quantity"
+                type="number"
+                min={1}
+                placeholder="1"
+                onChange={handleQuantityChange}
+                className="w-16 rounded-md border p-2"
+              />
+            </div>
+            <div className="text-muted-foreground items mt-4">
+              <p>
+                Price per item: {formatCurrency(product.priceInCents / 100)}
+              </p>
+              <p>Quantity: {localQuantity}</p>
+              <strong>Total: {formatCurrency(totalPrice / 100)}</strong>
+            </div>
+          </div>
         </div>
-        <Elements options={{ clientSecret, appearance }} stripe={stripePromise}>
-          <Form priceInCents={product.priceInCents} />
-        </Elements>
       </div>
-    </>
+
+      <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+        <CheckoutFormContent
+          clientSecret={clientSecret}
+          totalPrice={totalPrice}
+          quantity={localQuantity}
+        />
+      </Elements>
+    </div>
   );
 }
 
-function Form({ priceInCents }: { priceInCents: number }) {
+const CheckoutFormContent = ({
+  totalPrice,
+  quantity,
+}: {
+  clientSecret: string;
+  totalPrice: number;
+  quantity: number;
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [email, setEmail] = useState<string>();
 
   async function handleSubmit(e: FormEvent) {
@@ -109,23 +164,22 @@ function Form({ priceInCents }: { priceInCents: number }) {
 
     setIsLoading(true);
 
-    stripe
-      .confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/stripe/purchase-success`,
-        },
-      })
-      .then(({ error }) => {
-        if (error.type === 'card_error' || error.type === 'validation_error') {
-          setErrorMessage(error.message);
-        } else {
-          setErrorMessage('An unexpected error occurred.');
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/stripe/purchase-success?totalPrice=${totalPrice}&quantity=${quantity}`,
+      },
+    });
+
+    if (error) {
+      if (error.type === 'card_error' || error.type === 'validation_error') {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage('An unexpected error occurred.');
+      }
+    }
+
+    setIsLoading(false);
   }
 
   return (
@@ -139,24 +193,26 @@ function Form({ priceInCents }: { priceInCents: number }) {
             </CardDescription>
           )}
         </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-2">
           <PaymentElement />
           <LinkAuthenticationElement
-            onChange={(e) => setEmail(e.value.email)}
+            onChange={(e) => {
+              setEmail(e.value.email);
+            }}
           />
         </CardContent>
         <CardFooter>
           <Button
+            type="submit"
             className="w-full"
-            size="lg"
-            disabled={stripe == null || elements == null || isLoading}
+            disabled={isLoading || !stripe || !elements}
           >
             {isLoading
               ? 'Purchasing...'
-              : `Purchase - ${formatCurrency(priceInCents / 100)}`}
+              : `Checkout - ${formatCurrency(totalPrice / 100)}`}
           </Button>
         </CardFooter>
       </Card>
     </form>
   );
-}
+};

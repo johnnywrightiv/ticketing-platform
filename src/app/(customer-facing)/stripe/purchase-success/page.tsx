@@ -13,23 +13,34 @@ export default async function SuccessPage({
 }: {
   searchParams: {
     payment_intent: string;
+    quantity?: string;
+    total_price?: string;
   };
 }) {
   const paymentIntent = await stripe.paymentIntents.retrieve(
-    await searchParams.payment_intent,
+    searchParams.payment_intent,
   );
 
-  if (paymentIntent.metadata.productId == null) {
+  const { productId } = paymentIntent.metadata || {};
+  const { quantity, total_price } = searchParams;
+
+  if (!productId || !quantity) {
     return notFound();
   }
 
   const product = await db.product.findUnique({
-    where: { id: paymentIntent.metadata.productId },
+    where: { id: productId },
   });
 
-  if (product == null) {
+  if (!product) {
     return notFound();
   }
+
+  const parsedQuantity = parseInt(quantity, 10);
+  const parsedTotalPrice = total_price ? parseInt(total_price, 10) : undefined;
+
+  const calculatedTotalPrice =
+    parsedTotalPrice || product.priceInCents * parsedQuantity;
 
   const isSuccess = paymentIntent.status === 'succeeded';
 
@@ -61,15 +72,16 @@ export default async function SuccessPage({
               <p>
                 Price per item: {formatCurrency(product.priceInCents / 100)}
               </p>
+              <p>Quantity: {parsedQuantity}</p>
               <strong>
-                Total: {formatCurrency(product.priceInCents / 100)}
+                Total: {formatCurrency(calculatedTotalPrice / 100)}
               </strong>
             </div>
           </div>
           <Button size="lg" asChild>
             {isSuccess ? (
               <a
-                href={`/products/download/${await createDownloadVerificaion(product.id)}`}
+                href={`/products/download/${await createDownloadVerification(product.id)}`}
               >
                 Download
               </a>
@@ -83,7 +95,7 @@ export default async function SuccessPage({
   );
 }
 
-async function createDownloadVerificaion(productId: string) {
+async function createDownloadVerification(productId: string) {
   return (
     await db.downloadVerification.create({
       data: {
