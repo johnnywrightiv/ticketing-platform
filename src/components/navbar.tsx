@@ -3,7 +3,7 @@
 import React, { ComponentProps, useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { Menu, MoonIcon, SunIcon } from 'lucide-react';
+import { Menu, MoonIcon, SunIcon, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -64,9 +64,10 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
       <div className="container mx-auto grid h-16 grid-cols-2 items-center md:grid-cols-3">
         <Link
           href="/"
-          className="font-heading text-xl font-bold transition-colors"
+          className="font-heading flex items-center text-xl font-bold transition-colors"
         >
-          ACME CORP
+          <Ticket className="mr-2 h-5 w-5" />
+          QUICK TIX
         </Link>
 
         {/* Desktop Navigation */}

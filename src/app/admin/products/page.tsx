@@ -79,7 +79,7 @@ async function ProductsTable() {
             <TableCell>
               {product.isAvailableForPurchase ? (
                 <>
-                  <CheckCircle2 />
+                  <CheckCircle2 className="text-success" />
                   <span className="sr-only">Available</span>
                 </>
               ) : (

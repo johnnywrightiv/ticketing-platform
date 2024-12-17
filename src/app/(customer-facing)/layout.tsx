@@ -12,8 +12,8 @@ export default function Layout({
     <div className="min-h-screen">
       <Navbar>
         <NavLink href="/">Home</NavLink>
-        <NavLink href="/products">Products</NavLink>
-        <NavLink href="/orders">My Orders</NavLink>
+        <NavLink href="/products">Events</NavLink>
+        <NavLink href="/orders">My Tickets</NavLink>
       </Navbar>
       <div className="container my-6">{children}</div>
     </div>

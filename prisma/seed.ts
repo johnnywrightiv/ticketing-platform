@@ -9,7 +9,7 @@ async function main() {
       name: 'Concert A Ticket',
       priceInCents: 5000, // $50
       filePath: '/products/concert_a_ticket.pdf',
-      imagePath: '/products/concert_a.jpg',
+      imagePath: '/images/concert_a.jpg',
       description: 'A ticket for Concert A, a live concert event.',
     },
   });
@@ -19,7 +19,7 @@ async function main() {
       name: 'Concert B Ticket',
       priceInCents: 5500, // $55
       filePath: '/products/concert_b_ticket.pdf',
-      imagePath: '/products/concert_b.jpg',
+      imagePath: '/images/concert_b.jpg',
       description:
         'A ticket for Concert B, another exciting live concert event.',
     },
@@ -30,7 +30,7 @@ async function main() {
       name: 'Concert B VIP Meet and Greet',
       priceInCents: 12000, // $120
       filePath: '/products/concert_b_vip_meet_and_greet.pdf',
-      imagePath: '/products/concert_b_vip.jpg',
+      imagePath: '/images/concert_b_vip.jpg',
       description: 'VIP ticket for Concert B with a meet and greet experience.',
     },
   });
@@ -40,7 +40,7 @@ async function main() {
       name: 'Sports Event Ticket',
       priceInCents: 3000, // $30
       filePath: '/products/sports_event_ticket.pdf',
-      imagePath: '/products/sports_event.jpg',
+      imagePath: '/images/sports_event.jpg',
       description: 'A ticket for an exciting sports event.',
     },
   });
@@ -50,7 +50,7 @@ async function main() {
       name: 'Theatre Event Ticket',
       priceInCents: 7000, // $70
       filePath: '/products/theatre_event_ticket.pdf',
-      imagePath: '/products/theatre_event.jpg',
+      imagePath: '/images/theatre_event.jpg',
       description: 'A ticket for a fantastic theatre play.',
     },
   });

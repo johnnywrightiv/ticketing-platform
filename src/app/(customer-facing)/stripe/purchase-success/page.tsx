@@ -45,8 +45,13 @@ export default async function SuccessPage({
   const isSuccess = paymentIntent.status === 'succeeded';
 
   return (
-    <div className="bg-card w-full max-w-5xl justify-center space-y-8 rounded-[--radius] p-4">
-      <h1>{isSuccess ? 'Success!' : 'Error!'}</h1>
+    <div className="bg-card w-full justify-center space-y-8 rounded-[--radius] p-4">
+      <h1>{isSuccess ? 'Success! 🎉' : 'Error! 😢'}</h1>
+      <h3>
+        {isSuccess
+          ? 'Please download your ticket(s) below.'
+          : 'Please try again.'}
+      </h3>
       <div className="flex gap-4">
         <div className="relative aspect-video w-1/2 flex-shrink-0">
           <Image
@@ -59,9 +64,6 @@ export default async function SuccessPage({
         <div className="flex w-full flex-col justify-between">
           <div>
             <h3>{product.name}</h3>
-            <h6 className="text-muted-foreground">
-              {formatCurrency(product.priceInCents / 100)}
-            </h6>
             <div className="line-clamp text-muted-foreground">
               {product.description}
             </div>
