@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/card';
 import db from '@/db/db';
 import { formatCurrency, formatNumber } from '@/lib/formaters';
+import PageHeader from './_components/PageHeader';
 
 async function getSalesData() {
   const data = await db.order.aggregate({
@@ -144,13 +145,5 @@ function Bar({ height, label }: { height: string; label: string }) {
       />
       <span className="mt-2 text-sm">{label}</span>
     </div>
-  );
-}
-
-function PageHeader({ children }: { children: React.ReactNode }) {
-  return (
-    <h1 className="animate-fade-in mb-8 text-3xl font-bold tracking-tight">
-      {children}
-    </h1>
   );
 }
